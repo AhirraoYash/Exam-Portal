@@ -1,102 +1,165 @@
-// File: frontend/src/pages/SignupPage.jsx
-// Description: The user registration page component, styled with Tailwind CSS.
-
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+
+// --- ICONS ---
+// Reusing icons and adding one for user registration.
+
+const UserAddIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+    </svg>
+);
+
+const EyeIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+    </svg>
+);
+
+const EyeOffIcon = () => (
+     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+    </svg>
+);
+
 
 const SignupPage = () => {
-    // State to manage all form inputs in one object
     const [formData, setFormData] = useState({
-        fullName: '',
+        name: '',
         email: '',
-        password: '',
-        role: 'student', // Default role
-        department: 'Computer Science', // Default department
         prn: '',
-        year: 'First Year', // Default year
+        password: '',
+        confirmPassword: ''
     });
+    
+    const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [errors, setErrors] = useState({});
 
-    // Destructure for easier access in the form, especially for conditional rendering
-    const { role } = formData;
-
-    // A single handler to update the state for any form field change
-    const onChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+    const handleInputChange = (e) => {
+        const { id, value } = e.target;
+        setFormData({ ...formData, [id]: value });
     };
 
-    // Placeholder for form submission logic. We will connect this to our API later.
-    const onSubmit = (e) => {
+    const validate = () => {
+        const newErrors = {};
+        const { name, email, prn, password, confirmPassword } = formData;
+
+        if (!name) newErrors.name = 'Full name is required.';
+        if (!prn) newErrors.prn = 'PRN / Student ID is required.';
+        if (!email) {
+            newErrors.email = 'Email address is required.';
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            newErrors.email = 'Email address is invalid.';
+        }
+        if (!password) {
+            newErrors.password = 'Password is required.';
+        } else if (password.length < 8) {
+            newErrors.password = 'Password must be at least 8 characters long.';
+        }
+        if (!confirmPassword) {
+            newErrors.confirmPassword = 'Please confirm your password.';
+        } else if (password !== confirmPassword) {
+            newErrors.confirmPassword = 'Passwords do not match.';
+        }
+        return newErrors;
+    };
+
+    const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Form submitted with data:', formData);
-        // In a real step, we would call our apiService here.
+        const validationErrors = validate();
+        setErrors(validationErrors);
+
+        if (Object.keys(validationErrors).length === 0) {
+            setIsLoading(true);
+            console.log('Form is valid. Submitting...', formData);
+            
+            setTimeout(() => {
+                setIsLoading(false);
+                console.log("Registration successful (simulated)!");
+            }, 2000);
+        }
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg">
-                <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        Create your account
-                    </h2>
-                </div>
-                <form className="mt-8 space-y-6" onSubmit={onSubmit}>
-                    {/* Input fields for core user info */}
-                    <div className="rounded-md shadow-sm -space-y-px">
-                        <div>
-                            <input name="fullName" type="text" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Full Name" onChange={onChange} />
-                        </div>
-                        <div>
-                            <input name="email" type="email" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email address" onChange={onChange} />
-                        </div>
-                        <div>
-                            <input name="password" type="password" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Password" onChange={onChange} />
-                        </div>
-                    </div>
+        <div className="flex min-h-screen w-full font-sans">
+            
+            <div className="hidden md:flex md:w-1/2 flex-col items-center justify-center bg-blue-600 p-12 text-white">
+                <motion.div
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8, ease: 'easeOut' }}
+                    className="text-center"
+                >
+                    <h1 className="text-5xl font-bold">Join MCQ Master</h1>
+                    <p className="mt-4 text-lg opacity-90">Create your account to start taking tests.</p>
+                </motion.div>
+            </div>
 
-                    {/* Dropdowns for Role and Department */}
-                    <div className="space-y-4">
+            <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-50 p-8 sm:p-12">
+                 <motion.div
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: 'easeOut' }}
+                    className="w-full max-w-sm" // Changed from max-w-md to max-w-sm
+                >
+                    <div className="flex items-center gap-4 mb-6">
+                        <UserAddIcon />
+                        <h2 className="text-3xl font-bold text-gray-800">Create Student Account</h2>
+                    </div>
+                    
+                    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                         <div>
-                             <label htmlFor="role" className="sr-only">Role</label>
-                             <select id="role" name="role" value={role} onChange={onChange} className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                <option value="student">I am a Student</option>
-                                <option value="teacher">I am a Teacher</option>
-                            </select>
+                            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Full Name</label>
+                            <input id="name" type="text" value={formData.name} onChange={handleInputChange} className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm sm:text-sm ${errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}`} />
+                            {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name}</p>}
                         </div>
-                         <div>
-                             <label htmlFor="department" className="sr-only">Department</label>
-                             <select id="department" name="department" onChange={onChange} className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                <option>Computer Science</option>
-                                <option>Mechanical Engineering</option>
-                                <option>Physics</option>
-                                <option>Chemistry</option>
-                            </select>
+                        
+                        <div>
+                            <label htmlFor="prn" className="block text-sm font-medium text-gray-700">PRN / Student ID</label>
+                            <input id="prn" type="text" value={formData.prn} onChange={handleInputChange} className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm sm:text-sm ${errors.prn ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}`} />
+                            {errors.prn && <p className="mt-1 text-xs text-red-600">{errors.prn}</p>}
                         </div>
 
-                        {/* Conditional fields that only appear if the role is 'student' */}
-                        {role === 'student' && (
-                            <>
-                                <div>
-                                    <input name="prn" type="text" required className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="PRN Number" onChange={onChange} />
-                                </div>
-                                 <div>
-                                     <label htmlFor="year" className="sr-only">Year</label>
-                                     <select id="year" name="year" onChange={onChange} className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                        <option>First Year</option>
-                                        <option>Second Year</option>
-                                        <option>Third Year</option>
-                                        <option>Fourth Year</option>
-                                    </select>
-                                </div>
-                            </>
-                        )}
-                    </div>
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address</label>
+                            <input id="email" type="email" value={formData.email} onChange={handleInputChange} className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm sm:text-sm ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}`} />
+                            {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
+                        </div>
 
-                    {/* Submit Button */}
-                    <div>
-                        <button type="submit" className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            Register
-                        </button>
-                    </div>
-                </form>
+                        <div>
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+                            <div className="relative mt-1">
+                                <input id="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleInputChange} className={`block w-full rounded-md border px-3 py-2 shadow-sm sm:text-sm ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}`} />
+                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 flex items-center pr-3">
+                                    {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                                </button>
+                            </div>
+                            {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password}</p>}
+                        </div>
+
+                        <div>
+                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
+                            <input id="confirmPassword" type={showPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={handleInputChange} className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm sm:text-sm ${errors.confirmPassword ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}`} />
+                            {errors.confirmPassword && <p className="mt-1 text-xs text-red-600">{errors.confirmPassword}</p>}
+                        </div>
+
+                        <div className="pt-2">
+                            <button type="submit" disabled={isLoading} className="flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-sm transition-colors duration-300 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-blue-400 disabled:cursor-not-allowed">
+                                {isLoading ? 'Creating Account...' : 'Create Account'}
+                            </button>
+                        </div>
+                    </form>
+
+                    <p className="mt-8 text-center text-sm text-gray-600">
+                        Already have an account?{' '}
+                        <Link to="/" className="font-medium text-blue-600 hover:text-blue-500">
+                            Sign In
+                        </Link>
+                    </p>
+                </motion.div>
             </div>
         </div>
     );
