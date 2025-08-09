@@ -1,15 +1,13 @@
 import { useState } from 'react'
 import './App.css'
-
+import SignupPage from './pages/SignupPage'
 function App() {
    
 
   return (
     <>
-      
-        <h1 class="text-3xl bg-red-700 font-bold underline">
-    Hello world!
-  </h1>
+      <SignupPage></SignupPage>
+       
         
     </>
   )
